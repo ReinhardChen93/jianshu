@@ -24,6 +24,11 @@ import axios from 'axios'
         type: actionTypes.MOUSE_LEAVE
     });
 
+    export const changePageList = (page) => ({
+        type: actionTypes.CHANGE_PAGE,
+        page
+    });
+
     export const getList = () => {
         return (dispatch) => {
             axios.get('/api/headerList.json').then((res) => {

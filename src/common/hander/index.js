@@ -17,17 +17,20 @@ import {
 class Header extends Component{
 
     getListArea() {
-        const { focused, list, page, handleMouseIn, handleMouseLeave } = this.props;
+        const { focused, list, page, totalPage, mouseIn, handleMouseIn, handleMouseLeave, handleChangePage } = this.props;
         const newList = list.toJS();
         // 每页显示2个
         const pageList = [];
-        for (let i = (page - 1) * 2; i < page * 2; i++) {
-            pageList.push(
-                <SearchInfoItem key={newList[i]}>{newList[i]}</SearchInfoItem>
-            )
+        if(newList.length) {
+            for (let i = (page - 1) * 2; i < page * 2; i++) {
+                pageList.push(
+                    <SearchInfoItem key={newList[i]}>{newList[i]}</SearchInfoItem>
+                )
+            }
         }
+
         console.log(focused)
-        if (focused) {
+        if (focused || mouseIn) {
             return (
                 <SearchInfo
                     onMouseEnter = {handleMouseIn}
@@ -35,7 +38,7 @@ class Header extends Component{
                 >
                     <SearchInfoTitle>
                         热门搜索
-                        <SearchInfoSwitch>
+                        <SearchInfoSwitch onClick={() => handleChangePage(page, totalPage)}>
                             换一批
                         </SearchInfoSwitch>
                         <SearchInfoList>
@@ -96,7 +99,9 @@ const mapStateToProps = (state) => {
         focused: state.getIn(['header', 'focused']),
             // state.get('header').get('focused')
         list: state.getIn(['header', 'list']),
-        page: state.getIn(['header', 'page'])
+        page: state.getIn(['header', 'page']),
+        mouseIn: state.getIn(['header', 'mouseIn']),
+        totalPage: state.getIn(['header','totalPage'])
     }
 };
 
@@ -117,6 +122,14 @@ const mapDispatchToProps = (dispatch) => {
         },
         handleMouseLeave() {
             dispatch(actionCreators.mouseLeave());
+        },
+        handleChangePage(page, totalPage) {
+            if(page < totalPage) {
+                dispatch(actionCreators.changePageList(page + 1));
+            } else {
+                dispatch(actionCreators.changePageList(1));
+            }
+
         }
     }
 };
