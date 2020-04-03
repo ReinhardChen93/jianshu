@@ -38,7 +38,8 @@ class Header extends Component{
                 >
                     <SearchInfoTitle>
                         热门搜索
-                        <SearchInfoSwitch onClick={() => handleChangePage(page, totalPage)}>
+                        <SearchInfoSwitch onClick={() => handleChangePage(page, totalPage, this.spinIcon)}>
+                            <span ref={(icon) => { this.spinIcon = icon }} className="iconfont spin">&#xe851;</span>
                             换一批
                         </SearchInfoSwitch>
                         <SearchInfoList>
@@ -53,7 +54,7 @@ class Header extends Component{
 
     }
     render () {
-        const { focused, handleInputFocus, handleInputBlur } = this.props;
+        const { focused, handleInputFocus, handleInputBlur, list } = this.props;
         return (
             <React.Fragment>
             <HeaderWrapper>
@@ -73,11 +74,11 @@ class Header extends Component{
                             classNames={'slide'}>
                             <NavSearch
                                 className={focused ? 'focused' : ''}
-                                onFocus={handleInputFocus}
+                                onFocus={() => handleInputFocus(list)}
                                 onBlur={handleInputBlur}
                             />
                         </CSSTransition>
-                        <span className={focused ? 'focused iconfont' : 'iconfont'}>&#xe60b;</span>
+                        <span className={focused ? 'focused iconfont zoom' : 'iconfont zoom'}>&#xe60b;</span>
                         {this.getListArea()}
                     </SearchWrapper>
 
@@ -107,8 +108,11 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        handleInputFocus() {
-            dispatch(actionCreators.getList());
+        handleInputFocus(list) {
+            if(list.size === 0) {
+                // 减少不必要的请求
+                dispatch(actionCreators.getList());
+            }
             dispatch(actionCreators.searchFocus());
             // const action = actionCreators.searchFocus();
             // dispatch(action);
@@ -123,8 +127,17 @@ const mapDispatchToProps = (dispatch) => {
         handleMouseLeave() {
             dispatch(actionCreators.mouseLeave());
         },
-        handleChangePage(page, totalPage) {
-            if(page < totalPage) {
+        handleChangePage(page, totalPage, spin) {
+            console.log(spin)
+            let originAngle = spin.style.transform.replace(/[^0-9]/ig, ''); // 把'rotate(360deg)'中不是数字的全部替换未空
+
+            if (originAngle) {
+                originAngle = parseInt(originAngle, 10);
+            } else {
+                originAngle = 0
+            }
+            spin.style.transform = 'rotate(' + (originAngle + 360) + 'deg)';
+            if (page < totalPage) {
                 dispatch(actionCreators.changePageList(page + 1));
             } else {
                 dispatch(actionCreators.changePageList(1));
